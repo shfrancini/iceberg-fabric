@@ -1,0 +1,4 @@
+rate_pps,sender_result,receiver_export_result,validation_result,meaning
+15,"640/640 sent","640/640 read","PASS, 0 missing / 0 extra","Existing pipeline still kept up"
+20,"640/640 sent","537/640 read","FAIL, 391,680 missing / 304,128 extra","Receiver/export path fell behind"
+25,"640/640 sent","434/640 read","FAIL","Shortfall worsened as rate increased"

@@ -1,0 +1,109 @@
+# SSH template for running event 4245 from standard FABRIC or local Jupyter.
+# Copy this file before editing:
+#   cp configs/event_4245_replay_ssh_template.yaml configs/event_4245_replay_ssh.yaml
+# Then edit the copied file. Do not run smoke/full replay against the template
+# placeholders.
+#
+# Required transport fields:
+# - username: VM login user, commonly ubuntu for FABRIC images.
+# - sender_host: sender VM management IP, DNS name, or SSH config Host alias.
+# - receiver_host: receiver VM management IP, DNS name, or SSH config Host alias.
+# - ssh_key: private key path from the Jupyter/local machine. Leave empty if
+#   IdentityFile is already supplied by ssh_options -F /path/to/ssh_config.
+# - ssh_options: extra arguments passed before user@host. Use this for FABRIC
+#   generated SSH configs, ProxyJump/-J bastions, BatchMode, or host-key policy.
+# - copy_tool: scp by default; rsync is supported only if available locally and
+#   on the target VM.
+#
+# Local/remote path rule:
+# - paths.output_root is local to the machine running this notebook/runner.
+# - paths.receiver_root, paths.wibviz_src, paths.mapping_csv, and
+#   validation.reference_csv are receiver VM paths.
+# - paths.sender_root and pcap_replay.sender_pcap are sender VM paths.
+schema_version: 1
+label: event-4245
+event_id: "4245"
+source_mode: pcap_replay
+
+transport:
+  type: ssh
+  username: ubuntu
+  sender_host: replace-with-sender-management-ip-or-dns
+  receiver_host: replace-with-receiver-management-ip-or-dns
+  ssh_key: ~/.ssh/fabric_slice_key
+  ssh_options:
+    - -o
+    - BatchMode=yes
+    - -o
+    - StrictHostKeyChecking=accept-new
+    # FABRIC-generated SSH config example:
+    # - -F
+    # - /path/to/fabric_ssh_config
+    # Direct ProxyJump example:
+    # - -J
+    # - bastion.example.org
+  copy_tool: scp
+
+slice:
+  # name is informational for SSH transport; sender_node/receiver_node are
+  # logical keys that map to sender_host/receiver_host above.
+  name: dune-udp-demo-rebuild-2
+  sender_node: sender
+  receiver_node: receiver
+
+network:
+  # Data-plane interface names inside the VMs. Update these after checking
+  # `ip -brief addr` on each VM.
+  sender_interface: enp7s0
+  receiver_interface: enp7s0
+  capture_filter: udp and dst port 2049
+  expected_sender_ip: 192.168.1.1/24
+  expected_receiver_ip: 192.168.1.2/24
+
+paths:
+  # Local to the Jupyter/runner machine. Use /tmp or local scratch, not a small
+  # shared workspace, for large run products.
+  output_root: /tmp/dune_fabric_live_demo
+  receiver_root: /home/ubuntu
+  sender_root: /home/ubuntu
+  # Receiver VM must already contain this WIBViz source tree and mapping CSV.
+  wibviz_src: /home/ubuntu/wibviz_graph/src
+  mapping_csv: /home/ubuntu/wibviz_inputs/event-4245-channel-map.csv
+
+pcap_replay:
+  # Sender VM must already contain this PCAP.
+  sender_pcap: /home/ubuntu/dune-replay/pcap/icecosmich_run82134054_sub001_evt004245.pcap
+  replay_timing: pps
+  pps: 50
+  packet_limit: 640
+  tcpreplay_extra_args: []
+
+decode:
+  tpc: 0
+  plane: 0
+  chunking:
+    mode: fixed_packet_count
+    chunk_packets: 64
+  queue:
+    implementation: queue_v2
+    decode_workers: 1
+  adaptive:
+    enabled: false
+    experimental: true
+    min_chunk_packets: 32
+    max_chunk_packets: 256
+
+visualization:
+  enabled: true
+  outputs:
+    - heatmap
+    - stacked_waveform
+  max_rows: 500000
+
+validation:
+  enabled: true
+  # Receiver VM must already contain this reference CSV for full validation.
+  reference_csv: /home/ubuntu/wibviz_inputs/4245.csv
+  compare_fields: seq_id,timestamp,tick,adc_value,wire_id,tpc,slot,plane
+  expected_packets: 640
+  expected_rows: 409600

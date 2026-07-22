@@ -1,0 +1,73 @@
+{
+  "method": "reproduced benchmark from original graph_notebook/generate_graph.ipynb logic",
+  "notebook": "/home/fabric/work/visualization-wibwiz/graph_notebook/generate_graph.ipynb",
+  "csv": "/home/fabric/work/visualization-wibwiz/graph_notebook/4245.csv",
+  "images": {
+    "heatmap": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
+    "ridgeline": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png"
+  },
+  "row_count": 409600,
+  "csv_tick_range": [
+    0,
+    2047
+  ],
+  "csv_wire_range": [
+    0,
+    199
+  ],
+  "wire_count": 200,
+  "tpc_values": [
+    0
+  ],
+  "plane_values": [
+    0
+  ],
+  "pivot_shape": [
+    200,
+    2048
+  ],
+  "plot_matrix_shape": [
+    200,
+    2047
+  ],
+  "plotted_tick_range": [
+    0,
+    2046
+  ],
+  "heatmap_wire_order": "top-to-bottom/display rows follow pivot order 199 down to 0",
+  "ridgeline_wire_order": "bottom-to-top/display baselines use 0 up to 199",
+  "heatmap_pedestal_method": "per-wire median",
+  "heatmap_zmin": -20,
+  "heatmap_zmax": 50,
+  "ridgeline_signal_gain": 0.01,
+  "ridgeline_step": 1.0,
+  "ridgeline_baseline": "i * step",
+  "ridgeline_centering": "per-wire mean subtraction",
+  "plotly_export_status": {
+    "heatmap": "plotly export failed: \nImage export using the \"kaleido\" engine requires the Kaleido package,\nwhich can be installed using pip:\n\n    $ pip install --upgrade kaleido\n",
+    "ridgeline": "plotly export failed: \nImage export using the \"kaleido\" engine requires the Kaleido package,\nwhich can be installed using pip:\n\n    $ pip install --upgrade kaleido\n"
+  },
+  "png_method": "matplotlib static reproduction from original notebook arrays",
+  "validation": {
+    "heatmap": {
+      "path": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
+      "bytes": 321000,
+      "shape": [
+        1300,
+        900,
+        4
+      ]
+    },
+    "ridgeline": {
+      "path": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png",
+      "bytes": 1865531,
+      "shape": [
+        2500,
+        1200,
+        4
+      ]
+    }
+  },
+  "summary_json": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_render_summary.json",
+  "report": "/home/fabric/work/visualization-wibwiz/rebuild_restore/reports/final_presentation_evidence_2026-07-22/original_benchmark_4245.md"
+}
