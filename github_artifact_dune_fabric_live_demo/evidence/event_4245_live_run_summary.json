@@ -1,0 +1,57 @@
+{
+  "combined_csv": "/tmp/dune_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/artifacts/combined.csv",
+  "config_path": "/home/fabric/work/visualization-wibwiz/dune_fabric_live_demo/configs/event_4245_replay.yaml",
+  "local_run_dir": "/tmp/dune_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z",
+  "manifest": "/tmp/dune_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/reports/manifest.json",
+  "pass": true,
+  "queue_metrics": {
+    "append_completed_chunk_count": 10,
+    "decode_completed_chunk_count": 10,
+    "decode_workers_configured": 1,
+    "queue_depth_chunks": 0,
+    "raw_chunk_preserved_count": 10,
+    "raw_packet_drops": 0
+  },
+  "run_id": "presentation-live-4245-20260722T153315Z",
+  "source_mode": "pcap_replay",
+  "validation": {
+    "compare_fields": [
+      "seq_id",
+      "timestamp",
+      "tick",
+      "adc_value",
+      "wire_id",
+      "tpc",
+      "slot",
+      "plane"
+    ],
+    "comparison": {
+      "extra_examples": [],
+      "extra_row_count": 0,
+      "generated_rows_compared": 409600,
+      "missing_examples": [],
+      "missing_row_count": 0,
+      "pass": true,
+      "reference_rows_compared": 409600
+    },
+    "enabled": true,
+    "generated_lines_including_header": 409601,
+    "generated_rows": 409600,
+    "output": "/home/ubuntu/wibviz_outputs/dune_fabric_live_demo/presentation-live-4245-20260722T153315Z/combined.csv",
+    "output_sha256": "96478dbbb7a6f16ae59a10f50db59352c1e0397b965b8284f07fc7423449d9b5",
+    "pass": true,
+    "reference": "/home/ubuntu/wibviz_inputs/4245.csv",
+    "reference_lines_including_header": 409601,
+    "reference_rows": 409600,
+    "reference_sha256": "17f183d058f019664986353fde2f39cade68eb37bf122f796de89bd4d946f04b",
+    "returncode": 0,
+    "validation_type": "generic_csv_reference_comparison"
+  },
+  "visualization": {
+    "created": [
+      "/tmp/dune_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/visualizations/heatmap.png",
+      "/tmp/dune_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/visualizations/stacked_waveform.png"
+    ],
+    "enabled": true
+  }
+}
