@@ -1,10 +1,10 @@
 # WibViz
 
-A command-line tool to dissect, analyze, and visualize DUNE WIB (Wireless Interface Board) UDP data streams in real-time. It provides a `curses`-based terminal interface to display channel activities and network statistics. It also provides a library for outputting mappings of ADC channels and their values to their physical wire IDs.
+A command-line tool to dissect, analyze, and visualize DUNE WIB (Warm Interface Board) UDP data streams in real-time. It provides a `curses`-based terminal interface to display channel activities and network statistics. It also provides a library for outputting mappings of ADC channels and their values to their physical wire IDs.
 
 [Demo](https://github.com/dingp/wibwiz/blob/main/wibviz-screen-cap.gif?raw=true)
 
-[Sample heatmap graph of event 4245](https://https://alldaybreakfast.neocities.org/pages/4245.html)
+[Sample heatmap graph of event 4245](https://alldaybreakfast.neocities.org/pages/4245.html)
 
 [Sample ridgeline graph of event 4245](https://alldaybreakfast.neocities.org/pages/4245_ridgeline.html)
 
@@ -29,7 +29,7 @@ A command-line tool to dissect, analyze, and visualize DUNE WIB (Wireless Interf
 
 The tool can be run in two modes: live sniffing on a network interface or reading from a pre-recorded `.pcap` file.
 
-The tool also provides a library for extracting mapped data from ICERBERG. You can import this library by installing wibviz wherever you want to import the code. Documentation for using the library's methods can be found in [wibviz_GDE_usage.md](docs/wibviz_GDE_usage.md).
+The tool also provides a library for extracting mapped data from ICEBERG. You can import this library by installing wibviz wherever you want to import the code. Documentation for using the library's methods can be found in [wibviz_GDE_usage.md](docs/wibviz_GDE_usage.md).
 
 ### Live Sniffing
 
