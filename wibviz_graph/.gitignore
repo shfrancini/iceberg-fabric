@@ -1,0 +1,10 @@
+/build
+/src/wibviz.egg-info
+src/wibviz/__pycache__
+tests/__pycache__
+*.pyc
+/scripts/test_root
+/pcap
+/.venv
+mapping.csv
+out.txt

@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Local scratch and generated review files
+tmp/
+output/
+
+# Office temporary files
+~$*
+
+# Local captures and exports
+*.pcap
+*.pcapng
+replay-*.csv
+mapping.csv
+out.txt

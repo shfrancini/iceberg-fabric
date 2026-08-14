@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wibviz"
+version = "0.2.1"
+description = "A dissector and visualizer for DUNE WIB UDP data streams."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "scapy",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "dash>=2.14",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "plotly>=5.18",
+]
+
+[project.scripts]
+wibviz = "wibviz.cli:main"
+wibviz-export = "wibviz.export:main"
+wibviz-dashboard = "wibviz.dashboard:main"
+wibviz-delta-server = "wibviz.delta_server:main"
