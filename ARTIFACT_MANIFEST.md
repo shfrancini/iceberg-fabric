@@ -17,8 +17,6 @@ runtime output, packet captures, caches, and local environments are excluded by
 
 ## Supporting utilities
 
-- `scripts/build_pipeline_plan_pdf.py` builds a project-planning PDF from an
-  external capacity-summary dataset; the dataset is not included.
 - `wibviz_graph/pyproject.toml` defines the Python package, dependencies,
   optional dashboard dependencies, and command-line entry points.
 - `wibviz_graph/scripts/` contains mapping-environment setup helpers and the
