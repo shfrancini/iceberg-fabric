@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iceberg-fabric"
+version = "0.1.0"
+description = "Portable single-decoder FABRIC replay pipeline for ICEBERG/WIB packet visualization."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "ICEBERG FABRIC contributors"}]
+dependencies = [
+    "PyYAML>=6.0",
+    "matplotlib>=3.7",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scapy>=2.5",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "dash>=2.14",
+    "plotly>=5.18",
+]
+notebook = [
+    "ipykernel>=6",
+    "jupyterlab>=4",
+    "nbformat>=5",
+]
+dev = [
+    "pytest>=7",
+]
+all = [
+    "dash>=2.14",
+    "ipykernel>=6",
+    "jupyterlab>=4",
+    "nbformat>=5",
+    "plotly>=5.18",
+    "pytest>=7",
+]
+
+[project.scripts]
+iceberg-fabric = "iceberg_fabric.cli:main"
+
+[tool.setuptools.packages.find]
+where = [".", "wibviz_graph/src"]
+include = ["iceberg_fabric*", "wibviz*", "scripts"]

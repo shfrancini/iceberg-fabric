@@ -134,6 +134,7 @@ class SSHTransport:
         self.username = username
         self.hosts = {node: host for node, host in hosts.items() if host}
         self.log_file = log_file
+        self.ssh_key_config = str(ssh_key) if ssh_key else ""
         self.ssh_key = str(Path(ssh_key).expanduser()) if ssh_key else ""
         self.ssh_options = ssh_options or []
         self.copy_tool = copy_tool
@@ -203,7 +204,7 @@ class SSHTransport:
             "type": self.transport_type,
             "username": self.username,
             "hosts": dict(sorted(self.hosts.items())),
-            "ssh_key": self.ssh_key or None,
+            "ssh_key": self.ssh_key_config or None,
             "ssh_options": self.ssh_options,
             "copy_tool": self.copy_tool,
         }

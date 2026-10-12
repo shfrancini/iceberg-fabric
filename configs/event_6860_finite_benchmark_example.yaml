@@ -1,0 +1,100 @@
+# Event 6860 finite benchmark example.
+# This is not a bundled dataset and not a sustained-throughput claim. Provide
+# the PCAP, mapping CSV, and trusted reference CSV on your sender/receiver VMs.
+schema_version: 1
+label: event-6860-finite-single-decoder-example
+event_id: "6860"
+source_mode: pcap_replay
+
+experiment:
+  name: event-6860-single-decoder-finite-benchmark
+  event_input: /home/ubuntu/dune-replay/pcap/icecosmich_run82134054_sub001_evt006860.pcap
+  repeats: 1
+  packets_per_repeat: 640
+  input_rate_pps: 100
+  chunk_packets: 64
+  decoder_workers: 1
+  queue_capacity_chunks: 4
+  bounded_queues: true
+  output_root: /tmp/iceberg_fabric_runs
+  validation_method: exact_csv_reference_compare
+  validation_reference_csv: /home/ubuntu/wibviz_inputs/icecosmich_run82134054_sub001_evt006860.csv
+  validated_output_throughput_method: validated packets and rows divided by measured total runtime
+
+transport:
+  type: ssh
+  username: ubuntu
+  ssh_key: ~/.ssh/fabric_slice_key
+  ssh_options:
+    - -o
+    - BatchMode=yes
+    - -o
+    - StrictHostKeyChecking=accept-new
+  copy_tool: scp
+  hosts:
+    sender: sender.example.fabric.testbed.net
+    receiver: receiver.example.fabric.testbed.net
+
+slice:
+  name: your-fabric-slice
+  sender_node: sender
+  receiver_node: receiver
+
+network:
+  sender_interface: enp7s0
+  receiver_interface: enp7s0
+  capture_filter: udp and dst port 2049
+  expected_sender_ip: ""
+  expected_receiver_ip: ""
+
+paths:
+  output_root: /tmp/iceberg_fabric_runs
+  receiver_root: /home/ubuntu
+  sender_root: /home/ubuntu
+  wibviz_src: /home/ubuntu/iceberg-fabric/wibviz_graph/src
+  mapping_csv: /home/ubuntu/wibviz_inputs/event-4245-channel-map.csv
+
+pcap_replay:
+  sender_pcap: /home/ubuntu/dune-replay/pcap/icecosmich_run82134054_sub001_evt006860.pcap
+  replay_timing: pps
+  pps: 100
+  packet_limit: 640
+  tcpreplay_extra_args: []
+
+decode:
+  tpc: 0
+  plane: 2
+  chunking:
+    mode: fixed_packet_count
+    chunk_packets: 64
+  queue:
+    implementation: queue_v2
+    pipeline_mode: concurrent
+    decode_workers: 1
+    decode_worker_mode: persistent_receiver_process
+    capacity_chunks: 4
+    persistent_batch_chunks: 1
+    persistent_batch_collect_timeout_seconds: 0.2
+    require_bounded_queues: true
+  adaptive:
+    enabled: false
+    experimental: true
+    min_chunk_packets: 64
+    max_chunk_packets: 64
+
+output:
+  write_strategy: ordered_append
+
+visualization:
+  enabled: true
+  outputs:
+    - heatmap
+    - stacked_waveform
+  max_rows: 500000
+
+validation:
+  enabled: true
+  reference_csv: /home/ubuntu/wibviz_inputs/icecosmich_run82134054_sub001_evt006860.csv
+  compare_fields: slot,seq_id,timestamp,tick,adc_value,wire_id,plane
+  expected_packets: 640
+  expected_rows: 491520

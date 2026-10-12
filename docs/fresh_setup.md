@@ -1,213 +1,96 @@
 # Fresh User Checklist
 
-Use this checklist before running `wib_fabric_live_demo` on a new FABRIC slice or from external/local Jupyter. The first file to open is `00_RUN_DEMO.ipynb`.
+Use this checklist before running the public baseline on a new existing FABRIC
+slice. No Python edits are required.
 
-## Current Status
+## 1. Install Locally
 
-- LoomAI transport is currently validated.
-- SSH transport is implemented and dry-run validated.
-- A real SSH smoke test still requires actual VM host/key details, reachable VMs, and VM-side files.
+```bash
+python3 -m pip install -e '.[dev,dashboard,notebook]'
+```
 
-## 1. Choose The Transport
+## 2. Copy A Config
 
-Use LoomAI when running inside the validated LoomAI Jupyter environment:
+```bash
+cp configs/single_decoder_baseline_template.yaml configs/my_baseline.yaml
+```
+
+Edit only YAML values in `configs/my_baseline.yaml`.
+
+## 3. Choose Transport
+
+Use LoomAI when running inside a configured LoomAI environment:
 
 ```yaml
 transport:
   type: loom
 ```
 
-Use SSH when running from standard FABRIC or local Jupyter:
+Use SSH from a local workstation or standard notebook:
 
 ```yaml
 transport:
   type: ssh
   username: ubuntu
-  sender_host: <sender-management-ip-or-dns-or-ssh-config-alias>
-  receiver_host: <receiver-management-ip-or-dns-or-ssh-config-alias>
   ssh_key: ~/.ssh/fabric_slice_key
+  hosts:
+    sender: sender.example.fabric.testbed.net
+    receiver: receiver.example.fabric.testbed.net
 ```
 
-For SSH, copy a template first:
+Add `transport.ssh_options` for SSH config files or ProxyJump when your FABRIC
+access path requires it.
 
-```bash
-cp configs/event_4245_replay_ssh_template.yaml configs/event_4245_replay_ssh.yaml
-cp configs/live_nic_ssh_template.yaml configs/live_nic_ssh.yaml
-```
+## 4. Confirm VM State
 
-If your access goes through FABRIC bastions, add the generated SSH config or ProxyJump options in `transport.ssh_options`:
+Sender VM for replay:
 
-```yaml
-ssh_options:
-  - -F
-  - /path/to/fabric_ssh_config
-  - -o
-  - BatchMode=yes
-```
+- `python3`
+- `tcpreplay`
+- user-provided PCAP at `pcap_replay.sender_pcap`
+- correct `network.sender_interface`
 
-or:
-
-```yaml
-ssh_options:
-  - -J
-  - bastion.example.org
-  - -o
-  - BatchMode=yes
-```
-
-## 2. What Must Already Exist
-
-Before real smoke/full runs, confirm:
-
-- active FABRIC slice
-- sender VM reachable for `pcap_replay`
-- receiver VM reachable
-- detector/data interface name known
-- `tcpdump` installed on receiver
-- `tcpreplay` installed on sender for replay mode
-- Python dependencies available on receiver for WIBViz decode/export
-- PCAP file on sender for replay mode
-- mapping CSV on receiver
-- optional reference CSV on receiver for validation
-- SSH credentials/config if using external/local Jupyter
-
-## 3. Confirm VM Files And Tools
-
-Receiver VM requirements:
+Receiver VM:
 
 - `python3`
 - `tcpdump`
-- passwordless or non-interactive `sudo tcpdump`
-- WIBViz source tree at `paths.wibviz_src`, for example `/home/ubuntu/wibviz_graph/src`
-- channel mapping CSV at `paths.mapping_csv`
-- reference CSV if `validation.enabled: true`
+- non-interactive `sudo tcpdump`
+- WibViz source at `paths.wibviz_src`
+- mapping CSV at `paths.mapping_csv`
+- reference CSV at `validation.reference_csv` if validation is enabled
+- writable `paths.receiver_root`
 
-Sender VM requirements for `pcap_replay`:
+## 5. Run In Order
 
-- `tcpreplay`
-- source PCAP at `pcap_replay.sender_pcap`
-- configured sender data-plane interface at `network.sender_interface`
-
-The runner uploads only its helper validator script. It does not install packages, clone WIBViz, create the slice, discover IPs, or upload input PCAP/reference files.
-
-## 4. Configure PCAP Replay Mode
-
-Start from one of these:
+Local-only checks:
 
 ```bash
-configs/event_4245_replay.yaml
-configs/event_6860_replay.yaml
-configs/custom_pcap_replay_template.yaml
-configs/event_4245_replay_ssh_template.yaml
+iceberg-fabric preflight --config configs/my_baseline.yaml --local-only
+iceberg-fabric run --config configs/my_baseline.yaml --dry-run
 ```
 
-Key fields:
-
-```yaml
-source_mode: pcap_replay
-network:
-  sender_interface: enp7s0
-  receiver_interface: enp7s0
-  capture_filter: udp and dst port 2049
-paths:
-  output_root: /tmp/wib_fabric_live_demo   # local to the Jupyter machine
-  wibviz_src: /home/ubuntu/wibviz_graph/src # receiver VM path
-  mapping_csv: /home/ubuntu/wibviz_inputs/event-4245-channel-map.csv
-pcap_replay:
-  sender_pcap: /home/ubuntu/wib-replay/pcap/my-event.pcap
-  replay_timing: pps
-  pps: 50
-  packet_limit: 640
-```
-
-Use `packet_limit` for a bounded event replay. Use CLI `--max-live-chunks 2` for a smoke test without editing the config.
-
-## 5. Configure Live NIC Mode
-
-Start from one of these:
+Remote readiness preflight:
 
 ```bash
-configs/live_nic_template.yaml
-configs/live_nic_ssh_template.yaml
+iceberg-fabric preflight --config configs/my_baseline.yaml
 ```
 
-Key fields:
-
-```yaml
-source_mode: live_nic
-network:
-  receiver_interface: enp7s0
-  capture_filter: udp and dst port 2049
-live_nic:
-  chunk_seconds: 5
-  max_chunks: null
-  stop_file: /tmp/wib_fabric_live_demo.stop
-```
-
-Live mode does not start `tcpreplay` and does not require a sender. For safety, run bounded captures with `--max-live-chunks N` unless you intentionally use `--follow`.
-
-## 6. Run In Order
-
-Dry-run first:
+Bounded smoke test:
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml --dry-run
+iceberg-fabric run --config configs/my_baseline.yaml --max-live-chunks 2
 ```
 
-Bounded LoomAI smoke test:
+Full user-provided replay:
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml --max-live-chunks 2
+iceberg-fabric run --config configs/my_baseline.yaml
 ```
 
-Full LoomAI replay:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml
-```
-
-SSH dry-run after editing copied template:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay_ssh.yaml --dry-run
-```
-
-SSH smoke test after real host/key/path details are confirmed:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay_ssh.yaml --max-live-chunks 2
-```
-
-## Custom PCAP Without Code Changes
-
-1. Copy the template:
-
-```bash
-cp configs/custom_pcap_replay_template.yaml configs/my_pcap.yaml
-```
-
-2. Edit only YAML fields: `label`, `event_id`, `pcap_replay.sender_pcap`, `decode.tpc`, `decode.plane`, `paths.mapping_csv`, and optional `validation` fields.
-
-3. Dry-run:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/my_pcap.yaml --dry-run
-```
-
-4. Smoke test:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/my_pcap.yaml --max-live-chunks 2
-```
-
-No Python code changes are required for a different PCAP as long as the packet format is still supported by the existing WIBViz decoder.
-
-## Still Not Automatic
+## Still Manual
 
 - Creating or provisioning the FABRIC slice.
-- Discovering sender/receiver management hosts for SSH configs.
-- Installing `tcpdump`, `tcpreplay`, Python dependencies, or WIBViz on VMs.
-- Copying source PCAPs, mapping CSVs, or reference CSVs to VMs.
-- Determining the correct data-plane interface names for a new topology.
-- Configuring FABRIC bastion/ProxyJump SSH access from external/local Jupyter.
-- Operating live continuous stream as a polished production service.
+- Installing VM packages.
+- Copying large PCAP, mapping, and reference files.
+- Discovering management hostnames and data-plane interfaces.
+- Selecting legally shareable data.

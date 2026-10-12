@@ -2,24 +2,32 @@
 import csv
 from datetime import datetime
 import os
+from pathlib import Path
 import re
 import subprocess
 from functools import lru_cache
-from pathlib import Path
-from typing import Any, Union
 from wibviz.tick_offset import TickOffsetHelper
 from .schema import GraphStruct
+from scapy.all import Any, Ether, Union
+
+WIBFRAME_CHANNEL_BY_NAME = {
+    f"adc{adc_index}ch{chan_index}": (adc_index * 16) + chan_index
+    for adc_index in range(4)
+    for chan_index in range(16)
+}
+
 
 class GraphDataExtractor:
     track_offsets: bool
+    packet_buffer = {}
     tick_offset_helper: TickOffsetHelper
 
     def __init__(self, track_offsets, verbose=False, mapping_path=None):
         self.track_offsets = track_offsets
         self.verbose = verbose
-        self.tick_offset_helper = TickOffsetHelper(on=track_offsets)
         self.channel_map = {}
         self.wire_map = {}
+        self.tick_offset_helper = TickOffsetHelper(on=track_offsets)
 
         if mapping_path is None:
             mapping_path = os.environ.get(
@@ -29,58 +37,48 @@ class GraphDataExtractor:
             )
 
         self.mapping_path = Path(mapping_path).expanduser()
+
         if self.mapping_path.is_file():
             self._load_mapping_file(self.mapping_path)
 
-    def _load_mapping_file(self, mapping_path):
-        """Load hardware, offline-channel, and wire mappings once."""
-        required = {
-            "crate",
-            "slot",
-            "stream",
-            "channel",
-            "offline_channel",
-            "plane",
-            "wire_id",
-            "tpc",
-        }
+    def reset_for_chunk(self):
+        """Reset chunk-local tick state while preserving loaded mapping caches."""
+        self.tick_offset_helper = TickOffsetHelper(on=self.track_offsets)
 
+    def _load_mapping_file(self, mapping_path):
         with mapping_path.open(newline="", encoding="utf-8") as mapping_file:
             reader = csv.DictReader(mapping_file)
-            missing = required.difference(reader.fieldnames or ())
-            if missing:
-                columns = ", ".join(sorted(missing))
-                raise ValueError(
-                    f"mapping file {mapping_path} is missing column(s): {columns}"
-                )
 
             for row in reader:
-                hardware = (
-                    int(row["crate"]),
-                    int(row["slot"]),
-                    int(row["stream"]),
-                    int(row["channel"]),
-                )
+                crate = int(row["crate"])
+                slot = int(row["slot"])
+                stream = int(row["stream"])
+                channel = int(row["channel"])
                 offline_channel = int(row["offline_channel"])
                 plane = int(row["plane"])
                 wire_id = int(row["wire_id"])
                 tpc = int(row["tpc"])
 
-                self.channel_map[hardware] = (offline_channel, plane)
-                self.wire_map[offline_channel] = (wire_id, tpc)
-    
+                self.channel_map[
+                    (crate, slot, stream, channel)
+                ] = (offline_channel, plane)
+
+                self.wire_map[
+                    offline_channel
+                ] = (wire_id, tpc)
+
     def _ensure_scapy_packet(self, packet: Union[bytes, bytearray, Any]) -> Any:
         if isinstance(packet, (bytes, bytearray)):
-            from scapy.all import Ether
-
             return Ether(bytes(packet))
         return packet
 
     @lru_cache(maxsize=None)
     def _get_offline_channel_and_plane(self, crate, slot, stream, chan):
-        mapped = self.channel_map.get((crate, slot, stream, chan))
-        if mapped is not None:
-            return mapped
+        if self.channel_map:
+            return self.channel_map.get(
+                (crate, slot, stream, chan),
+                (-1, -1),
+            )
 
         channel_map_result = subprocess.run(
             [
@@ -112,9 +110,8 @@ class GraphDataExtractor:
 
     @lru_cache(maxsize=None)
     def _get_wire_info(self, offline_channel):
-        mapped = self.wire_map.get(offline_channel)
-        if mapped is not None:
-            return mapped
+        if self.wire_map:
+            return self.wire_map.get(offline_channel)
 
         channel_to_wire_result = subprocess.run(
             ['channel-to-wire', str(offline_channel)],
@@ -135,34 +132,42 @@ class GraphDataExtractor:
         wire_id = int(match.group(2))
         return wire_id, tpc
 
-    def process_packet_and_return_schema_data(self, data, tpc, plane, pkt):
+    def process_packet_and_return_schema_data(self, data, tpc, plane, pkt, include_csv_rows=True):
         packet = self._ensure_scapy_packet(data)
         waveforms = packet['waveforms']
         daqH = packet['daqH']
         if self.verbose:
             print("PACKET: " + str(daqH.timestamp) + ", stream: " + str(daqH.stream_id) + ", slot: " + str(daqH.slot_id))
         schemas = []
-        csv_rows = []
+        csv_rows = [] if include_csv_rows else None
         
         for tick_idx, waveform_data in enumerate(waveforms):
             tick_rows, tick_schemas = self._process_tick(
-                    tick_idx,
-                    waveform_data,
-                    tpc,
-                    plane,
-                    pkt,
-                    daqH
-                )
-            csv_rows.extend(tick_rows)
+                tick_idx,
+                waveform_data,
+                tpc,
+                plane,
+                pkt,
+                daqH,
+                include_csv_rows=include_csv_rows,
+            )
+            if include_csv_rows:
+                csv_rows.extend(tick_rows)
             schemas.extend(tick_schemas)
-            
+                    
         if self.track_offsets:
             self.tick_offset_helper.increment_tick_offset_64_for_slot_stream(daqH.slot_id, daqH.stream_id)
             
-        return csv_rows, schemas
+        return csv_rows or [], schemas
 
     def write_schemas_to_csv(self, data, tpc, plane, pkt, with_datestamp=False):
-        rows, schemas = self.process_packet_and_return_schema_data(data, tpc, plane, pkt)
+        rows, schemas = self.process_packet_and_return_schema_data(
+            data,
+            tpc,
+            plane,
+            pkt,
+            include_csv_rows=True,
+        )
 
         if rows:
             if with_datestamp:
@@ -184,21 +189,11 @@ class GraphDataExtractor:
         return None
 
     def _calculate_wibframechan(self, channel_name):
-        match = re.match(r'adc(\d+)ch(\d+)', channel_name)
-        
-        if not match:
-            return None
-        
-        adc_index = int(match.group(1))
-        chan_index = int(match.group(2))
-        
-        wibframechan = (adc_index * 16) + chan_index
-        
-        return wibframechan
+        return WIBFRAME_CHANNEL_BY_NAME.get(channel_name)
 
 
-    def _process_tick(self, tick_idx, waveform_data, tpc, plane, pkt, daqH):
-        rows = []
+    def _process_tick(self, tick_idx, waveform_data, tpc, plane, pkt, daqH, include_csv_rows=False):
+        rows = [] if include_csv_rows else None
         schemas = []
         
         tick_for_schema = tick_idx
@@ -227,17 +222,22 @@ class GraphDataExtractor:
             )
 
             if schema:
-                rows.append(
-                    f"{schema.seq_id}, {schema.timestamp}, {schema.tick}, {schema.adc_value}, {schema.wire_id}, {schema.tpc}, {schema.slot}, {schema.plane}, {schema.packet_file}\n"
-                )
+                if include_csv_rows:
+                    rows.append(
+                        f"{schema.seq_id}, {schema.timestamp}, {schema.tick}, {schema.adc_value}, {schema.wire_id}, {schema.tpc}, {schema.slot}, {schema.plane}, {schema.packet_file}\n"
+                    )
                 schemas.append(schema)
 
-        return rows, schemas
+        return rows or [], schemas
 
     def build_schema(self, seq_id, timestamp, tick, adc_value, tpc_target, plane_target, crate, slot, stream, chan, packet_file):
         offline_channel, plane_on = self._get_offline_channel_and_plane(crate, slot, stream, chan)
         
-        if offline_channel < 0 or (plane_target is not None and plane_on != plane_target):
+        if (  # ADDED CONDITIONS INSTEAD OF OFF_LINE_CHANNEL < 0
+            offline_channel in (-1, 4294967295)
+            or plane_on == 9999
+            or (plane_target is not None and plane_on != plane_target)
+        ):
             return None
 
         wire_info = self._get_wire_info(offline_channel)

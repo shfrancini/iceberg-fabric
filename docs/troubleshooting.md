@@ -1,69 +1,107 @@
 # Troubleshooting
 
-## Dry-Run First
+## Start With Preflight
 
-Use dry-run before any replay or live capture:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml --dry-run
-```
-
-Check the planned sender PCAP, receiver interface, capture filter, output root,
-and validation reference.
-
-## `tcpreplay` Not Found
-
-`pcap_replay` requires `tcpreplay` on the sender VM. Install sender
-dependencies before running replay mode.
-
-## `tcpdump` Permission Or Interface Errors
-
-The receiver must have `tcpdump`, sudo access, and the configured interface:
+Run a local-only check before testing credentials:
 
 ```bash
-ip -brief addr show dev enp7s0
+iceberg-fabric preflight --config configs/single_decoder_baseline_template.yaml --local-only
 ```
 
-If the interface name differs, update `network.receiver_interface`.
+Then run against your real config:
 
-## No Packets Captured
-
-Check:
-
-- the receiver interface name
-- `network.capture_filter`
-- sender and receiver data-plane IPs
-- whether real live traffic is actually present for `live_nic`
-
-The default capture filter is:
-
-```text
-udp and dst port 2049
+```bash
+iceberg-fabric preflight --config configs/my_baseline.yaml
 ```
 
-## Decode Fails
+Every `FAIL` line includes a repair instruction. Fix required failures before
+running any replay.
 
-The receiver must have the WIBViz source tree and channel mapping CSV:
+## Dependency Failures
+
+If preflight reports a missing Python dependency, reinstall from the clone root:
+
+```bash
+python3 -m pip install -e '.[dev,dashboard,notebook]'
+```
+
+If optional dashboard or notebook dependencies are missing and you do not use
+those workflows, the warning can be ignored.
+
+## SSH Or LoomAI Command Missing
+
+For SSH transport, install or expose `ssh` and `scp` locally and set:
+
+```yaml
+transport:
+  type: ssh
+  username: ubuntu
+  ssh_key: ~/.ssh/fabric_slice_key
+  hosts:
+    sender: sender.example.fabric.testbed.net
+    receiver: receiver.example.fabric.testbed.net
+```
+
+For LoomAI transport, run inside an environment where `loomai` is installed and
+configured, then use `transport.type: loom`.
+
+## Sender Or Receiver Unreachable
+
+Check the configured node names and hosts. For SSH transport, `slice.sender_node`
+and `slice.receiver_node` must match keys in `transport.hosts`. Add SSH config
+or ProxyJump options through `transport.ssh_options` when your FABRIC access
+requires a bastion.
+
+## Remote Tool Failures
+
+Replay mode requires `tcpreplay` on the sender and `tcpdump` on the receiver.
+The receiver must also be able to run `sudo -n tcpdump` non-interactively.
+Install missing VM packages or update sudo policy before replay.
+
+## Interface Or Capture Permission Failures
+
+Set the data-plane interface names, not management interfaces:
+
+```yaml
+network:
+  sender_interface: enp7s0
+  receiver_interface: enp7s0
+  capture_filter: udp and dst port 2049
+```
+
+If `tcpdump` captures no packets, verify the interface, filter, sender replay
+interface, and data-plane routing outside this runner.
+
+## PCAP, Mapping, Reference, Or WibViz Path Failures
+
+The runner does not copy large inputs for you. Confirm these paths exist on the
+correct VM:
 
 ```yaml
 paths:
-  wibviz_src: /home/ubuntu/wibviz_graph/src
-  mapping_csv: /home/ubuntu/wibviz_inputs/event-4245-channel-map.csv
+  wibviz_src: /path/on/receiver/iceberg-fabric/wibviz_graph/src
+  mapping_csv: /path/on/receiver/event-channel-map.csv
+pcap_replay:
+  sender_pcap: /path/on/sender/input.pcap
+validation:
+  reference_csv: /path/on/receiver/reference.csv
 ```
 
-Decode logs are written under the run-specific receiver report directory.
+Disable validation only when you intentionally do not have a matching reference:
+
+```bash
+iceberg-fabric run --config configs/my_baseline.yaml --no-validate --dry-run
+```
 
 ## Validation Fails
 
-Validation is exact CSV comparison over configured fields. Confirm that:
+Exact validation compares configured fields row by row. Use a reference CSV from
+the same PCAP, mapping, TPC/plane filters, packet limit, and packet ordering.
+Partial smoke tests should use matching partial references or `--no-validate`.
 
-- the reference CSV matches the PCAP/event
-- `compare_fields` are present in both generated and reference CSV files
-- partial or live captures do not use a full-event reference
+## Disk Space Or Output Permission Failures
 
-Disable validation for live data without a reference:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/live_nic_template.yaml --no-validate
-```
-
+Set `paths.output_root` to a local writable filesystem with enough space for
+reports, copied decoded chunks, and visualizations. Set `paths.receiver_root` to
+a writable receiver VM directory and confirm it has enough space for raw chunks
+and temporary decode files.

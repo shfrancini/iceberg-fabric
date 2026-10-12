@@ -55,9 +55,9 @@ Receiver VM:
 LoomAI:
 
 ```text
-/home/fabric/work/visualization-wibwiz/graph_notebook/4245.csv
-/home/fabric/work/visualization-wibwiz/graph_notebook/live_replay_viewer.ipynb
-/home/fabric/work/visualization-wibwiz/graph_notebook/validate_live_replay.ipynb
+<source-workspace>/graph_notebook/4245.csv
+<source-workspace>/graph_notebook/live_replay_viewer.ipynb
+<source-workspace>/graph_notebook/validate_live_replay.ipynb
 ```
 
 ## Start the demonstration

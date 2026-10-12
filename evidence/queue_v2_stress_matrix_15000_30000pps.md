@@ -48,7 +48,7 @@ The 30,000 pps result did not expose packet loss, tcpdump drops, validation mism
 
 ## Artifacts
 
-- compact CSV: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/queue_v2_2026-07-14/event_6860_queue_v2_stress_matrix_15000_30000pps.csv`
-- compact JSON: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/queue_v2_2026-07-14/event_6860_queue_v2_stress_matrix_15000_30000pps.json`
+- compact CSV: `<source-workspace>/rebuild_restore/artifacts/queue_v2_2026-07-14/event_6860_queue_v2_stress_matrix_15000_30000pps.csv`
+- compact JSON: `<source-workspace>/rebuild_restore/artifacts/queue_v2_2026-07-14/event_6860_queue_v2_stress_matrix_15000_30000pps.json`
 - source Queue v2 summaries: `/tmp/wibviz-queue-live/reports/queue_capture_decode_2026-07-14/queue-v2d-6860-640pkt-<PPS>pps/summary.json`
 - source Queue v2 manifests: `/tmp/wibviz-queue-live/reports/queue_capture_decode_2026-07-14/queue-v2d-6860-640pkt-<PPS>pps/queue_manifest.json`
