@@ -8,15 +8,15 @@ The original notebook was not executed in-place, so no notebook outputs were add
 
 ## Original Code Path
 
-- Original notebook: `/home/fabric/work/visualization-wibwiz/graph_notebook/generate_graph.ipynb`
+- Original notebook: `<source-workspace>/graph_notebook/generate_graph.ipynb`
 - CSV/pivot cell: `graph_notebook/generate_graph.ipynb` JSON text around lines 1499-1515
 - Heatmap cell: `graph_notebook/generate_graph.ipynb` JSON text around lines 2638-2694
 - Ridgeline cell: `graph_notebook/generate_graph.ipynb` JSON text around lines 8544-8608
-- Reproduction renderer: `/home/fabric/work/visualization-wibwiz/rebuild_restore/scripts/render_original_benchmark_4245.py`
+- Reproduction renderer: `<source-workspace>/rebuild_restore/scripts/render_original_benchmark_4245.py`
 
 ## Data
 
-- CSV/data file: `/home/fabric/work/visualization-wibwiz/graph_notebook/4245.csv`
+- CSV/data file: `<source-workspace>/graph_notebook/4245.csv`
 - Rows: `409600`
 - CSV tick range: `0` to `2047`
 - CSV wire range: `0` to `199` (`200` wires)
@@ -25,8 +25,8 @@ The original notebook was not executed in-place, so no notebook outputs were add
 
 ## Generated Images
 
-- Heatmap PNG: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png`
-- Ridgeline PNG: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png`
+- Heatmap PNG: `<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png`
+- Ridgeline PNG: `<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png`
 
 ## Benchmark Plot Semantics
 
@@ -58,6 +58,6 @@ which can be installed using pip:
 
 ## Validation
 
-- Heatmap PNG exists and is readable: `{'path': '/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png', 'bytes': 321000, 'shape': [1300, 900, 4]}`
-- Ridgeline PNG exists and is readable: `{'path': '/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png', 'bytes': 1865531, 'shape': [2500, 1200, 4]}`
-- Summary JSON: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_render_summary.json`
+- Heatmap PNG exists and is readable: `{'path': '<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png', 'bytes': 321000, 'shape': [1300, 900, 4]}`
+- Ridgeline PNG exists and is readable: `{'path': '<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png', 'bytes': 1865531, 'shape': [2500, 1200, 4]}`
+- Summary JSON: `<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_render_summary.json`

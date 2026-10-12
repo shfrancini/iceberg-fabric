@@ -1,10 +1,10 @@
 {
   "method": "reproduced benchmark from original graph_notebook/generate_graph.ipynb logic",
-  "notebook": "/home/fabric/work/visualization-wibwiz/graph_notebook/generate_graph.ipynb",
-  "csv": "/home/fabric/work/visualization-wibwiz/graph_notebook/4245.csv",
+  "notebook": "<source-workspace>/graph_notebook/generate_graph.ipynb",
+  "csv": "<source-workspace>/graph_notebook/4245.csv",
   "images": {
-    "heatmap": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
-    "ridgeline": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png"
+    "heatmap": "<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
+    "ridgeline": "<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png"
   },
   "row_count": 409600,
   "csv_tick_range": [
@@ -50,7 +50,7 @@
   "png_method": "matplotlib static reproduction from original notebook arrays",
   "validation": {
     "heatmap": {
-      "path": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
+      "path": "<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_heatmap.png",
       "bytes": 321000,
       "shape": [
         1300,
@@ -59,7 +59,7 @@
       ]
     },
     "ridgeline": {
-      "path": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png",
+      "path": "<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_ridgeline.png",
       "bytes": 1865531,
       "shape": [
         2500,
@@ -68,6 +68,6 @@
       ]
     }
   },
-  "summary_json": "/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_render_summary.json",
-  "report": "/home/fabric/work/visualization-wibwiz/rebuild_restore/reports/final_presentation_evidence_2026-07-22/original_benchmark_4245.md"
+  "summary_json": "<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/original_benchmark_4245/event_4245_original_benchmark_render_summary.json",
+  "report": "<source-workspace>/rebuild_restore/reports/final_presentation_evidence_2026-07-22/original_benchmark_4245.md"
 }

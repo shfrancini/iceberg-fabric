@@ -1,81 +1,57 @@
 # Reproducibility
 
-*Verification status: I am still verifying these steps and results.*
+This file records the public no-replay and user-provided replay workflows. The
+repository does not include large PCAP inputs or private slice configuration.
 
-Run commands from the artifact root.
-
-## 1. Install Local Dependencies
-
-```bash
-python3 -m pip install pyyaml pandas matplotlib
-```
-
-Confirm local tools:
+## Install
 
 ```bash
-ssh -V
-scp -V 2>/dev/null || true
+python3 -m pip install -e '.[dev,dashboard,notebook]'
 ```
 
-## 2. LoomAI / FABRIC Jupyter Path
-
-Dry-run:
+## Local Checks Without FABRIC
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml --dry-run
+python3 -m py_compile iceberg_fabric/*.py scripts/*.py wibviz_graph/src/wibviz/*.py
+python3 -m pytest wibviz_graph/tests
+python3 scripts/validate_persistent_multichunk_batching_no_replay.py
+iceberg-fabric preflight --config configs/single_decoder_baseline_template.yaml --local-only
+iceberg-fabric run --config configs/single_decoder_baseline_template.yaml --dry-run
+iceberg-fabric demo --output /tmp/iceberg_fabric_readme_demo
 ```
 
-Two-chunk smoke test:
+These commands do not replay packets and do not contact FABRIC nodes when
+`--local-only` and `--dry-run` are used as shown.
+
+## User-Provided Replay
+
+Copy and edit the baseline template:
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml --max-live-chunks 2
+cp configs/single_decoder_baseline_template.yaml configs/my_baseline.yaml
 ```
 
-Full event 4245 replay:
+Run preflight against the real sender and receiver:
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay.yaml
+iceberg-fabric preflight --config configs/my_baseline.yaml
 ```
 
-## 3. External / Standard Jupyter SSH Path
-
-Copy the SSH template:
+Run a bounded smoke test:
 
 ```bash
-cp configs/event_4245_replay_ssh_template.yaml configs/event_4245_replay_ssh.yaml
+iceberg-fabric run --config configs/my_baseline.yaml --max-live-chunks 2
 ```
 
-Edit the copied config with real VM management hosts, username, SSH key, optional ProxyJump or FABRIC SSH config, data-plane interfaces, and remote file paths.
-
-SSH dry-run:
+Run the full configured replay only after the smoke test validates the selected
+PCAP, mapping, reference CSV, interfaces, and output paths:
 
 ```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay_ssh.yaml --dry-run
+iceberg-fabric run --config configs/my_baseline.yaml
 ```
 
-SSH smoke test:
+## Historical Evidence
 
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay_ssh.yaml --max-live-chunks 2
-```
-
-SSH full replay:
-
-```bash
-python3 scripts/run_pipeline.py --config configs/event_4245_replay_ssh.yaml
-```
-
-## 4. Notebook Order
-
-1. `notebooks/00_RUN_DEMO.ipynb`
-2. `notebooks/event_4245_live_demo_presentation.ipynb`
-
-Both notebooks in this artifact are output-stripped. Running them will create local outputs under `/tmp/wib_fabric_live_demo/runs/<run_id>/` unless configured otherwise.
-
-## 5. VM-Side Prerequisites
-
-Sender VM must have `tcpreplay` and the event 4245 PCAP. Receiver VM must have `tcpdump`, WIBViz source, mapping CSV, and optional validation reference CSV. See `docs/external_jupyter_setup.md` and `docs/fresh_setup.md` for the full checklist.
-
-## 6. Evidence Without Rerun
-
-The `figures/` and `evidence/` directories contain copied, compact evidence from the current working system. These are for understanding and verification; they are not required to run the replay pipeline.
+The `evidence/` and `figures/` directories contain compact historical artifacts
+from recorded runs. They document observed behavior for those runs only and are
+not general throughput guarantees.

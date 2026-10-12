@@ -1,19 +1,20 @@
 import argparse
 import curses
-import logging
 import os
 import sys
-import threading
+from scapy.all import sniff, PcapReader, AsyncSniffer
 import time
-
-from scapy.all import AsyncSniffer, PcapReader
-
+import threading
 from .processing import Processor
 from .display import Display
-
+import threading
+from .graph_data_extractor import GraphDataExtractor
 
 def main_loop(stdscr, args):
     processor = Processor(args)
+    gde = GraphDataExtractor(track_offsets=True)
+    # The processor is passed to the display only in live mode, 
+    # where the display is updated by the signal handler.
     display_processor = processor if not args.pcap_file else None
     display = Display(stdscr, 
                       args.interface if not args.pcap_file else None, 
@@ -27,12 +28,16 @@ def main_loop(stdscr, args):
             for packet in packets:
                 if not running:
                     break
+                #processed_data_comp = processor.process_packet_all_ticks(packet)
                 processed_data = processor.process_packet(packet)
                 if processed_data:
                     display.update(processed_data)
-
+                    #gde.write_schemas_to_csv(processed_data_comp, tpc=0, plane=0, pkt=args.pcap_file)
+                    
                 if display.handle_input() == 'quit':
                     running = False
+        #except FileNotFoundError:
+         #   sys.exit(f"Error: PCAP file not found at {args.pcap_file}")
         except Exception as e:
             sys.exit(f"Error reading PCAP file: {e}")
     else:
@@ -72,6 +77,8 @@ def main_loop(stdscr, args):
             sniffer_thread.join()
 
 def main():
+    # Suppress scapy runtime warnings to prevent them from messing up the UI
+    import logging
     logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
     logging.getLogger("scapy.loading").setLevel(logging.ERROR)
 

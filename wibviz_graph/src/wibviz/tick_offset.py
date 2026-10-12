@@ -16,7 +16,7 @@ class TickOffset:
         
 class TickOffsetHelper:
     on: bool
-    
+
     def __init__(self, on=False):
         self.on = on
         self.tick_offsets = []

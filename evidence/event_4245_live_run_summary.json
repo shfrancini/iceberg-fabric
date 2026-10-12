@@ -1,6 +1,6 @@
 {
   "combined_csv": "/tmp/wib_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/artifacts/combined.csv",
-  "config_path": "/home/fabric/work/visualization-wibwiz/wib_fabric_live_demo/configs/event_4245_replay.yaml",
+  "config_path": "<source-workspace>/wib_fabric_live_demo/configs/event_4245_replay.yaml",
   "local_run_dir": "/tmp/wib_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z",
   "manifest": "/tmp/wib_fabric_live_demo/runs/presentation-live-4245-20260722T153315Z/reports/manifest.json",
   "pass": true,

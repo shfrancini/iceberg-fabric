@@ -45,5 +45,5 @@ The current `wib_fabric_live_demo/00_RUN_DEMO.ipynb` also contains an optional h
 
 ## Artifacts
 
-- Coverage CSV: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/event_4245_chunk_coverage_table.csv`
-- Wire coverage plot: `/home/fabric/work/visualization-wibwiz/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/event_4245_chunk_wire_tick_coverage.png`
+- Coverage CSV: `<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/event_4245_chunk_coverage_table.csv`
+- Wire coverage plot: `<source-workspace>/rebuild_restore/artifacts/final_presentation_evidence_2026-07-22/event_4245_chunk_wire_tick_coverage.png`
